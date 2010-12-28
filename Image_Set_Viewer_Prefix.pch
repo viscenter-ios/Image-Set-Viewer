@@ -1,0 +1,8 @@
+//
+// Prefix header for all source files of the 'Image Set Viewer' target in the 'Image Set Viewer' project
+//
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+    #import <UIKit/UIKit.h>
+#endif
