@@ -31,6 +31,7 @@
     CGRect bounds = [[UIScreen mainScreen] bounds];
     
     containerView = [[UIView alloc] initWithFrame:bounds];
+    containerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     
     NSString *filePath = [[imageSets objectForKey:[[imageSets allKeys] objectAtIndex:1]] objectAtIndex:0];
     NSLog(@"Loading %@", filePath);
@@ -39,6 +40,7 @@
     view1.contentMode = UIViewContentModeScaleAspectFit;
     view1.backgroundColor = [UIColor blackColor];
     view1.image = [UIImage imageWithContentsOfFile:filePath];
+    view1.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     
     [containerView addSubview:view1];
     
@@ -50,6 +52,7 @@
     view2.backgroundColor = [UIColor blackColor];
     view2.image = [UIImage imageWithContentsOfFile:filePath];
     view2.hidden = YES;
+    view2.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     
     [containerView addSubview:view2];
     
