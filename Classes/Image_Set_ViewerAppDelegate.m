@@ -83,9 +83,10 @@
     NSArray *fileNames = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:directoryPath error:nil];
     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[fileNames count]];
     for (NSString * fileName in fileNames) {
-		if ([fileName rangeOfString:@"[_-]\\d+\\.(tiff|tif|jpeg|jpg|png|gif|bmp)$" options:NSRegularExpressionSearch|NSCaseInsensitiveSearch].length != 0) {
+		if ([fileName rangeOfString:@"[_]\\d+\\.(tiff|tif|jpeg|jpg|png|gif|bmp)$" options:NSRegularExpressionSearch|NSCaseInsensitiveSearch].length != 0) {
             [filePaths addObject:[directoryPath stringByAppendingPathComponent:fileName]];
             NSLog(@"Found %@", fileName);
+            NSLog(@"Prefix %@", [fileName substringToIndex:([fileName rangeOfString:@"_" options:NSBackwardsSearch].location)]);
         }
     }
     //[[MLMediaLibrary sharedMediaLibrary] addFilePaths:filePaths];
