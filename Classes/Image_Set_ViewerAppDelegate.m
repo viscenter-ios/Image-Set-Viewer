@@ -20,10 +20,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {    
     
-    // Override point for customization after app launch. 
+    // Override point for customization after app launch.
     [self.window addSubview:viewController.view];
     [self.window makeKeyAndVisible];
-
+    
 	return YES;
 }
 
@@ -40,7 +40,6 @@
     /*
      Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
      */
-    [self _updateImageSetLibrary];
 }
 
 
@@ -68,38 +67,4 @@
     [super dealloc];
 }
 
-@end
-
-// idea taken from MobileVLC
-@implementation Image_Set_ViewerAppDelegate (Private)
-- (void)_updateImageSetLibrary {
-#if TARGET_IPHONE_SIMULATOR
-    NSString *directoryPath = @"/Users/ryan/work/dss/iOS";
-#else
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *directoryPath = [paths objectAtIndex:0];
-#endif
-    NSMutableDictionary *imageSets = [[NSMutableDictionary alloc] init];
-    
-    NSLog(@"Scanning %@", directoryPath);
-    NSArray *fileNames = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:directoryPath error:nil];
-    NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[fileNames count]];
-    for (NSString * fileName in fileNames) {
-		if ([fileName rangeOfString:@"[_]\\d+\\.(tiff|tif|jpeg|jpg|png|gif|bmp)$" options:NSRegularExpressionSearch|NSCaseInsensitiveSearch].length != 0) {
-            [filePaths addObject:[directoryPath stringByAppendingPathComponent:fileName]];
-            NSLog(@"Found %@", fileName);
-            NSString *filePrefix = [fileName substringToIndex:([fileName rangeOfString:@"_" options:NSBackwardsSearch].location)];
-            NSLog(@"Prefix %@", filePrefix);
-            if ([imageSets objectForKey:filePrefix] == nil) {
-                // dictionary doesn't have this prefix yet, alloc an array and set it
-                [imageSets setObject:[NSMutableArray array] forKey:filePrefix];
-            }
-            // add the file path to the prefix's key
-            NSMutableArray *fileArray = [imageSets objectForKey:filePrefix];
-            [fileArray addObject:[directoryPath stringByAppendingPathComponent:fileName]];
-        }
-    }
-    //[[MLMediaLibrary sharedMediaLibrary] addFilePaths:filePaths];
-	//[self.movieListViewController reloadMedia];
-}
 @end

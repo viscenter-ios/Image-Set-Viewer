@@ -9,8 +9,10 @@
 #import <UIKit/UIKit.h>
 
 @interface Image_Set_ViewerViewController : UIViewController {
-
+    NSMutableDictionary *imageSets;
 }
+
+- (void)updateImageSetLibrary;
 
 @end
 
