@@ -26,13 +26,18 @@
 - (void)loadView {
     [self updateImageSetLibrary];
     
+    CGRect bounds = [[UIScreen mainScreen] applicationFrame];
+    
     UIView *containerView = [[UIView alloc] init];
     
     NSString *filePath = [[imageSets objectForKey:[[imageSets allKeys] objectAtIndex:0]] objectAtIndex:0];
     NSLog(@"Loading %@", filePath);
     
-    UIImage *image1 = [UIImage imageWithContentsOfFile:filePath];
-    UIImageView *view1 = [[UIImageView alloc] initWithImage:image1];
+    UIImageView *view1 = [[UIImageView alloc] initWithFrame:bounds];
+    view1.contentMode = UIViewContentModeScaleAspectFit;
+    view1.backgroundColor = [UIColor blackColor];
+    view1.image = [UIImage imageWithContentsOfFile:filePath];
+    
     [containerView addSubview:view1];
     
     self.view = containerView;
