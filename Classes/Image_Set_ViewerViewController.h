@@ -9,10 +9,18 @@
 #import <UIKit/UIKit.h>
 
 @interface Image_Set_ViewerViewController : UIViewController {
+    UIView *containerView;
+	UIImageView *view1;
+	UIImageView *view2;
+	BOOL transitioning;
+    
     NSMutableDictionary *imageSets;
 }
 
+@property (nonatomic, retain) IBOutlet UIView *containerView;
+
 - (void)updateImageSetLibrary;
+- (IBAction)nextTransition:(UITapGestureRecognizer *)gestureRecognizer;
 
 @end
 
