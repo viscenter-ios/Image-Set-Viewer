@@ -25,6 +25,17 @@
 // Implement loadView to create a view hierarchy programmatically, without using a nib.
 - (void)loadView {
     [self updateImageSetLibrary];
+    
+    UIView *containerView = [[UIView alloc] init];
+    
+    NSString *filePath = [[imageSets objectForKey:[[imageSets allKeys] objectAtIndex:0]] objectAtIndex:0];
+    NSLog(@"Loading %@", filePath);
+    
+    UIImage *image1 = [UIImage imageWithContentsOfFile:filePath];
+    UIImageView *view1 = [[UIImageView alloc] initWithImage:image1];
+    [containerView addSubview:view1];
+    
+    self.view = containerView;
 }
 
 /*
