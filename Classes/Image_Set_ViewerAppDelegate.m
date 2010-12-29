@@ -79,6 +79,8 @@
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *directoryPath = [paths objectAtIndex:0];
 #endif
+    NSMutableDictionary *imageSets = [[NSMutableDictionary alloc] init];
+    
     NSLog(@"Scanning %@", directoryPath);
     NSArray *fileNames = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:directoryPath error:nil];
     NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[fileNames count]];
@@ -86,7 +88,15 @@
 		if ([fileName rangeOfString:@"[_]\\d+\\.(tiff|tif|jpeg|jpg|png|gif|bmp)$" options:NSRegularExpressionSearch|NSCaseInsensitiveSearch].length != 0) {
             [filePaths addObject:[directoryPath stringByAppendingPathComponent:fileName]];
             NSLog(@"Found %@", fileName);
-            NSLog(@"Prefix %@", [fileName substringToIndex:([fileName rangeOfString:@"_" options:NSBackwardsSearch].location)]);
+            NSString *filePrefix = [fileName substringToIndex:([fileName rangeOfString:@"_" options:NSBackwardsSearch].location)];
+            NSLog(@"Prefix %@", filePrefix);
+            if ([imageSets objectForKey:filePrefix] == nil) {
+                // dictionary doesn't have this prefix yet, alloc an array and set it
+                [imageSets setObject:[NSMutableArray array] forKey:filePrefix];
+            }
+            // add the file path to the prefix's key
+            NSMutableArray *fileArray = [imageSets objectForKey:filePrefix];
+            [fileArray addObject:[directoryPath stringByAppendingPathComponent:fileName]];
         }
     }
     //[[MLMediaLibrary sharedMediaLibrary] addFilePaths:filePaths];
