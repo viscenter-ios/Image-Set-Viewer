@@ -69,10 +69,8 @@
     
     NSLog(@"Scanning %@", directoryPath);
     NSArray *fileNames = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:directoryPath error:nil];
-    NSMutableArray *filePaths = [NSMutableArray arrayWithCapacity:[fileNames count]];
     for (NSString * fileName in fileNames) {
 		if ([fileName rangeOfString:@"[_]\\d+\\.(tiff|tif|jpeg|jpg|png|gif|bmp)$" options:NSRegularExpressionSearch|NSCaseInsensitiveSearch].length != 0) {
-            [filePaths addObject:[directoryPath stringByAppendingPathComponent:fileName]];
             NSLog(@"Found %@", fileName);
             NSString *filePrefix = [fileName substringToIndex:([fileName rangeOfString:@"_" options:NSBackwardsSearch].location)];
             NSLog(@"Prefix %@", filePrefix);
@@ -85,8 +83,6 @@
             [fileArray addObject:[directoryPath stringByAppendingPathComponent:fileName]];
         }
     }
-    //[[MLMediaLibrary sharedMediaLibrary] addFilePaths:filePaths];
-	//[self.movieListViewController reloadMedia];
 }
 
 
