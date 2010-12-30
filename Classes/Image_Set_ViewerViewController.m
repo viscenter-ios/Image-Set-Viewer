@@ -25,9 +25,7 @@
 */
 
 // Implement loadView to create a view hierarchy programmatically, without using a nib.
-- (void)loadView {
-    [self updateImageSetLibrary];
-    
+- (void)loadView {    
     CGRect bounds = [[UIScreen mainScreen] bounds];
     
     // From Apple PhotoScroller example
@@ -45,8 +43,23 @@
     containerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     containerView.backgroundColor = [UIColor blackColor];
     
+    self.view = containerView;
+    
+    [self setupTransitionViews];
+}
+
+- (void)setupTransitionViews {
+    CGRect bounds = [[UIScreen mainScreen] bounds];
+    
+    if (view1 != nil) {
+        [view1 removeFromSuperview];
+        [view2 removeFromSuperview];
+        [view1 release];
+        [view2 release];
+    }
+
     if (imageSets.count > 0) {
-        NSString *filePath = [[imageSets objectForKey:[[imageSets allKeys] objectAtIndex:1]] objectAtIndex:0];
+        NSString *filePath = [[imageSets objectForKey:[[imageSets allKeys] objectAtIndex:0]] objectAtIndex:0];
         NSLog(@"Loading %@", filePath);
         
         view1 = [[UIImageView alloc] initWithFrame:bounds];
@@ -57,7 +70,7 @@
         
         [containerView addSubview:view1];
         
-        filePath = [[imageSets objectForKey:[[imageSets allKeys] objectAtIndex:1]] objectAtIndex:1];
+        filePath = [[imageSets objectForKey:[[imageSets allKeys] objectAtIndex:0]] objectAtIndex:1];
         NSLog(@"Loading %@", filePath);
         
         view2 = [[UIImageView alloc] initWithFrame:bounds];
@@ -92,8 +105,6 @@
         
         [containerView addSubview:noImagesLabel];
     }
-    
-    self.view = containerView;
 }
 
 /*
@@ -218,6 +229,9 @@
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *directoryPath = [paths objectAtIndex:0];
 #endif
+    if (imageSets != nil) {
+        [imageSets release];
+    }
     imageSets = [[NSMutableDictionary alloc] init];
     
     NSLog(@"Scanning %@", directoryPath);
@@ -236,6 +250,7 @@
             [fileArray addObject:[directoryPath stringByAppendingPathComponent:fileName]];
         }
     }
+    [self setupTransitionViews];
 }
 
 

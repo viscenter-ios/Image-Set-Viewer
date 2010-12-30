@@ -22,6 +22,8 @@
 @property (nonatomic, retain) IBOutlet UIView *containerView;
 
 - (void)updateImageSetLibrary;
+- (void)setupTransitionViews;
+
 - (IBAction)nextTransition:(UITapGestureRecognizer *)gestureRecognizer;
 
 - (CGRect)frameForPagingScrollView;
