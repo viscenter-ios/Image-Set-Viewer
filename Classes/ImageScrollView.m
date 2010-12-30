@@ -225,7 +225,7 @@
         minScale = maxScale;
     }
     
-    self.maximumZoomScale = minScale; // disable zooming for now, too many problems
+    self.maximumZoomScale = maxScale;
     self.minimumZoomScale = minScale;
 }
 
