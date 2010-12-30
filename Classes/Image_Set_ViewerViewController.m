@@ -25,9 +25,8 @@
 */
 
 // Implement loadView to create a view hierarchy programmatically, without using a nib.
-- (void)loadView {    
-    CGRect bounds = [[UIScreen mainScreen] bounds];
-    
+- (void)loadView
+{    
     // From Apple PhotoScroller example
     // Step 1: make the outer paging scroll view
     CGRect pagingScrollViewFrame = [self frameForPagingScrollView];

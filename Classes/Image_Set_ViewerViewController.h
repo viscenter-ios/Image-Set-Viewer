@@ -25,15 +25,17 @@
     CGFloat       percentScrolledIntoFirstVisiblePage;
 }
 
-@property (nonatomic, retain) IBOutlet UIView *containerView;
+// @property (nonatomic, retain) IBOutlet UIView *containerView;
 
-- (void)setupTransitionViews;
-
-- (IBAction)nextTransition:(UITapGestureRecognizer *)gestureRecognizer;
+- (void)tilePages;
 
 - (CGRect)frameForPagingScrollView;
 - (CGRect)frameForPageAtIndex:(NSUInteger)index;
 - (CGSize)contentSizeForPagingScrollView;
+
+- (BOOL)isDisplayingPageForIndex:(NSUInteger)index;
+- (ImageScrollView *)dequeueRecycledPage;
+- (void)configurePage:(ImageScrollView *)page forIndex:(NSUInteger)index;
 
 - (void)updateImageSetLibrary;
 

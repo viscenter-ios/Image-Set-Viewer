@@ -61,7 +61,11 @@
 @property (assign) NSUInteger index;
 
 - (void)displayImage:(UIImage *)image;
-- (void)displayTiledImageNamed:(NSString *)imageName size:(CGSize)imageSize;
+- (void)displayImageSet:(NSMutableArray *)inputImageSet;
+- (void)setupTransitionViews;
+- (void)updateTransitionView;
+- (NSUInteger)nextIndex;
+- (void)setView:(UIImageView**)imageView atIndex:(NSUInteger)imageIndex;
 - (void)setMaxMinZoomScalesForCurrentBounds;
 
 - (CGPoint)pointToCenterAfterRotation;

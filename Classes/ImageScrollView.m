@@ -146,7 +146,8 @@
     [self setupTransitionViews];
 }
 
-- (void)setupTransitionViews {
+- (void)setupTransitionViews
+{
     self.zoomScale = 1.0;
     
     [self setView:&view1 atIndex:0];
