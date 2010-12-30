@@ -36,7 +36,7 @@
     pagingScrollView.showsVerticalScrollIndicator = NO;
     pagingScrollView.showsHorizontalScrollIndicator = YES;
     pagingScrollView.contentSize = [self contentSizeForPagingScrollView];
-    // pagingScrollView.delegate = self;
+    pagingScrollView.delegate = self;
     
     //containerView = [[UIView alloc] initWithFrame:bounds];
     //containerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
@@ -105,6 +105,8 @@
         int lastNeededPageIndex  = floorf((CGRectGetMaxX(visibleBounds)-1) / CGRectGetWidth(visibleBounds));
         firstNeededPageIndex = MAX(firstNeededPageIndex, 0);
         lastNeededPageIndex  = MIN(lastNeededPageIndex, imageSets.count - 1);
+        
+        NSLog(@"Tiling pages %i to %i", firstNeededPageIndex, lastNeededPageIndex);
         
         // Recycle no-longer-visible pages
         for (ImageScrollView *page in visiblePages) {
@@ -183,6 +185,13 @@
     // [page displayImage:[self imageAtIndex:index]];
 }
 
+#pragma mark -
+#pragma mark ScrollView delegate methods
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    [self tilePages];
+}
 
 #pragma mark -
 #pragma mark  Frame calculations
@@ -245,6 +254,8 @@
             [fileArray addObject:[directoryPath stringByAppendingPathComponent:fileName]];
         }
     }
+    pagingScrollView.contentSize = [self contentSizeForPagingScrollView];
+
     [self tilePages];
 }
 

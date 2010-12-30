@@ -68,8 +68,8 @@
     [self addGestureRecognizer: tapGesture];
     [tapGesture release];
     
-    view1 = nil;
-    view2 = nil;
+    //view1 = nil;
+    //view2 = nil;
     
     return self;
 }
@@ -113,6 +113,7 @@
 
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView
 {
+    //NSLog(@"View1: %@", view1);
     return view1;
 }
 
@@ -143,21 +144,20 @@
     imageSet = inputImageSet;
     setIndex = 0;
     
+    self.zoomScale = 1.0;
+
     [self setupTransitionViews];
+    
+    [self setMaxMinZoomScalesForCurrentBounds];
+    self.zoomScale = self.minimumZoomScale;
 }
 
 - (void)setupTransitionViews
-{
-    self.zoomScale = 1.0;
-    
+{    
     [self setView:&view1 atIndex:0];
     [self updateTransitionView];
     
     transitioning = NO;
-    
-    self.contentSize = [view1.image size];
-    [self setMaxMinZoomScalesForCurrentBounds];
-    self.zoomScale = self.minimumZoomScale;
 }
 
 - (void)updateTransitionView
@@ -183,36 +183,49 @@
     NSString *filePath = [imageSet objectAtIndex:imageIndex];
     NSLog(@"Loading %@", filePath);
     
-    *imageView = [[UIImageView alloc] initWithFrame:self.bounds];
-    imageView->contentMode = UIViewContentModeScaleAspectFit;
+    UIImage* loadedImage = [UIImage imageWithContentsOfFile:filePath];
+    
+    *imageView = [[UIImageView alloc] initWithImage:loadedImage];
+    //imageView->contentMode = UIViewContentModeScaleAspectFit;
     imageView->backgroundColor = [UIColor blackColor];
-    imageView->image = [UIImage imageWithContentsOfFile:filePath];
-    imageView->autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    
+    //imageView->autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     
     [self addSubview:*imageView];
+    
+    self.contentSize = loadedImage.size;
+    
+    NSLog(@"Bounds Size: %0.f %0.f", self.bounds.size.width, self.bounds.size.height);
+    NSLog(@"Content Size: %0.f %0.f", loadedImage.size.width, loadedImage.size.height);
+    NSLog(@"View Size: %0.f %0.f", imageView->bounds.size.width, imageView->bounds.size.height);
+    NSLog(@"Zoom: %f", self.zoomScale);
 }
 
 
 - (void)setMaxMinZoomScalesForCurrentBounds
 {
     CGSize boundsSize = self.bounds.size;
-    CGSize imageSize = view1.bounds.size;
+    CGSize imageSize = view1.bounds.size; //self.contentSize;
     
     // calculate min/max zoomscale
     CGFloat xScale = boundsSize.width / imageSize.width;    // the scale needed to perfectly fit the image width-wise
     CGFloat yScale = boundsSize.height / imageSize.height;  // the scale needed to perfectly fit the image height-wise
     CGFloat minScale = MIN(xScale, yScale);                 // use minimum of these to allow the image to become fully visible
     
+    NSLog(@"Scales: %f %f", xScale, yScale);
+    
     // on high resolution screens we have double the pixel density, so we will be seeing every pixel if we limit the
     // maximum zoom scale to 0.5.
     CGFloat maxScale = 1.0 / [[UIScreen mainScreen] scale];
+    
+    NSLog(@"Scale limits: %f %f", minScale, maxScale);
     
     // don't let minScale exceed maxScale. (If the image is smaller than the screen, we don't want to force it to be zoomed.) 
     if (minScale > maxScale) {
         minScale = maxScale;
     }
     
-    self.maximumZoomScale = maxScale;
+    self.maximumZoomScale = minScale; // disable zooming for now, too many problems
     self.minimumZoomScale = minScale;
 }
 
@@ -222,6 +235,14 @@
 -(void)performTransition
 {
     NSLog(@"Transitioning");
+    CGFloat zoomStart = self.zoomScale;
+    CGRect frameStart = view1.frame;
+    CGPoint centerStart = view1.center;
+    view2.center = centerStart;
+    view2.frame = frameStart;
+    
+    //NSLog(@"Center: %f %f", centerStart.x, centerStart.y);
+    
 	// First create a CATransition object to describe the transition
 	CATransition *transition = [CATransition animation];
 	// Animate over 3/4 of a second
@@ -250,6 +271,10 @@
     
     setIndex = [self nextIndex];
     [self updateTransitionView];
+    
+    self.zoomScale = zoomStart;
+    view1.center = centerStart;
+    view1.frame = frameStart;
 }
 
 -(void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag
@@ -279,6 +304,7 @@
 // returns the zoom scale to attempt to restore after rotation. 
 - (CGFloat)scaleToRestoreAfterRotation
 {
+    NSLog(@"scaleToRestoreAfterRotation");
     CGFloat contentScale = self.zoomScale;
     
     // If we're at the minimum zoom scale, preserve that by returning 0, which will be converted to the minimum
@@ -303,7 +329,8 @@
 
 // Adjusts content offset and scale to try to preserve the old zoomscale and center.
 - (void)restoreCenterPoint:(CGPoint)oldCenter scale:(CGFloat)oldScale
-{    
+{   
+    NSLog(@"restoreCenterPoint");
     // Step 1: restore zoom scale, first making sure it is within the allowable range.
     self.zoomScale = MIN(self.maximumZoomScale, MAX(self.minimumZoomScale, oldScale));
     
