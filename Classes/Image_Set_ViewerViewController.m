@@ -58,10 +58,49 @@
 }
 */
 
+#pragma mark -
+#pragma mark View controller rotation methods
 
 // Override to allow orientations other than the default portrait orientation.
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     return YES;
+}
+
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+{
+    // here, our pagingScrollView bounds have not yet been updated for the new interface orientation. So this is a good
+    // place to calculate the content offset that we will need in the new orientation
+    CGFloat offset = pagingScrollView.contentOffset.x;
+    CGFloat pageWidth = pagingScrollView.bounds.size.width;
+    
+    if (offset >= 0) {
+        firstVisiblePageIndexBeforeRotation = floorf(offset / pageWidth);
+        percentScrolledIntoFirstVisiblePage = (offset - (firstVisiblePageIndexBeforeRotation * pageWidth)) / pageWidth;
+    } else {
+        firstVisiblePageIndexBeforeRotation = 0;
+        percentScrolledIntoFirstVisiblePage = offset / pageWidth;
+    }    
+}
+
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+{
+    // recalculate contentSize based on current orientation
+    pagingScrollView.contentSize = [self contentSizeForPagingScrollView];
+    
+    // adjust frames and configuration of each visible page
+    for (ImageScrollView *page in visiblePages) {
+        CGPoint restorePoint = [page pointToCenterAfterRotation];
+        CGFloat restoreScale = [page scaleToRestoreAfterRotation];
+        page.frame = [self frameForPageAtIndex:page.index];
+        [page setMaxMinZoomScalesForCurrentBounds];
+        [page restoreCenterPoint:restorePoint scale:restoreScale];
+        
+    }
+    
+    // adjust contentOffset to preserve page location based on values collected prior to location
+    CGFloat pageWidth = pagingScrollView.bounds.size.width;
+    CGFloat newOffset = (firstVisiblePageIndexBeforeRotation * pageWidth) + (percentScrolledIntoFirstVisiblePage * pageWidth);
+    pagingScrollView.contentOffset = CGPointMake(newOffset, 0);
 }
 
 - (void)didReceiveMemoryWarning {
@@ -106,7 +145,7 @@
         firstNeededPageIndex = MAX(firstNeededPageIndex, 0);
         lastNeededPageIndex  = MIN(lastNeededPageIndex, imageSets.count - 1);
         
-        NSLog(@"Tiling pages %i to %i", firstNeededPageIndex, lastNeededPageIndex);
+        //NSLog(@"Tiling pages %i to %i", firstNeededPageIndex, lastNeededPageIndex);
         
         // Recycle no-longer-visible pages
         for (ImageScrollView *page in visiblePages) {
