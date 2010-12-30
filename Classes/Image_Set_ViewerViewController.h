@@ -10,6 +10,8 @@
 
 @interface Image_Set_ViewerViewController : UIViewController {
     UIView *containerView;
+    UIScrollView *pagingScrollView;
+    
 	UIImageView *view1;
 	UIImageView *view2;
 	BOOL transitioning;
@@ -21,6 +23,10 @@
 
 - (void)updateImageSetLibrary;
 - (IBAction)nextTransition:(UITapGestureRecognizer *)gestureRecognizer;
+
+- (CGRect)frameForPagingScrollView;
+- (CGRect)frameForPageAtIndex:(NSUInteger)index;
+- (CGSize)contentSizeForPagingScrollView;
 
 @end
 

@@ -30,6 +30,17 @@
     
     CGRect bounds = [[UIScreen mainScreen] bounds];
     
+    // From Apple PhotoScroller example
+    // Step 1: make the outer paging scroll view
+    CGRect pagingScrollViewFrame = [self frameForPagingScrollView];
+    pagingScrollView = [[UIScrollView alloc] initWithFrame:pagingScrollViewFrame];
+    pagingScrollView.pagingEnabled = YES;
+    pagingScrollView.backgroundColor = [UIColor blackColor];
+    pagingScrollView.showsVerticalScrollIndicator = NO;
+    pagingScrollView.showsHorizontalScrollIndicator = YES;
+    pagingScrollView.contentSize = [self contentSizeForPagingScrollView];
+    // pagingScrollView.delegate = self;
+    
     containerView = [[UIView alloc] initWithFrame:bounds];
     containerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     containerView.backgroundColor = [UIColor blackColor];
@@ -113,11 +124,44 @@
 
 - (void)dealloc {
     [containerView release];
+    [pagingScrollView release];
     [view1 release];
 	[view2 release];
     [imageSets release];
     [super dealloc];
 }
+
+#pragma mark -
+#pragma mark  Frame calculations
+#define PADDING  10
+
+- (CGRect)frameForPagingScrollView {
+    CGRect frame = [[UIScreen mainScreen] bounds];
+    frame.origin.x -= PADDING;
+    frame.size.width += (2 * PADDING);
+    return frame;
+}
+
+- (CGRect)frameForPageAtIndex:(NSUInteger)index {
+    // We have to use our paging scroll view's bounds, not frame, to calculate the page placement. When the device is in
+    // landscape orientation, the frame will still be in portrait because the pagingScrollView is the root view controller's
+    // view, so its frame is in window coordinate space, which is never rotated. Its bounds, however, will be in landscape
+    // because it has a rotation transform applied.
+    CGRect bounds = pagingScrollView.bounds;
+    CGRect pageFrame = bounds;
+    pageFrame.size.width -= (2 * PADDING);
+    pageFrame.origin.x = (bounds.size.width * index) + PADDING;
+    return pageFrame;
+}
+
+- (CGSize)contentSizeForPagingScrollView {
+    // We have to use the paging scroll view's bounds to calculate the contentSize, for the same reason outlined above.
+    CGRect bounds = pagingScrollView.bounds;
+    return CGSizeMake(bounds.size.width * imageSets.count, bounds.size.height);
+}
+
+#pragma mark -
+#pragma mark Transitioning
 
 -(void)performTransition
 {
@@ -162,6 +206,9 @@
 		[self performTransition];
 	}
 }
+
+#pragma mark -
+#pragma mark Image Wrangling
 
 // skeleton taken from MobileVLC
 - (void)updateImageSetLibrary {
