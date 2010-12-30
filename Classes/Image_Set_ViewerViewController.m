@@ -7,11 +7,11 @@
 //
 
 #import "Image_Set_ViewerViewController.h"
+#import "ImageScrollView.h"
+
 #import <QuartzCore/QuartzCore.h>
 
 @implementation Image_Set_ViewerViewController
-
-@synthesize containerView;
 
 /*
 // The designated initializer. Override to perform setup that is required before the view is loaded.
@@ -39,72 +39,17 @@
     pagingScrollView.contentSize = [self contentSizeForPagingScrollView];
     // pagingScrollView.delegate = self;
     
-    containerView = [[UIView alloc] initWithFrame:bounds];
-    containerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    containerView.backgroundColor = [UIColor blackColor];
+    //containerView = [[UIView alloc] initWithFrame:bounds];
+    //containerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    //containerView.backgroundColor = [UIColor blackColor];
     
-    self.view = containerView;
+    self.view = pagingScrollView;
     
-    [self setupTransitionViews];
-}
-
-- (void)setupTransitionViews {
-    CGRect bounds = [[UIScreen mainScreen] bounds];
+    // Step 2: prepare to tile content
+    recycledPages = [[NSMutableSet alloc] init];
+    visiblePages  = [[NSMutableSet alloc] init];
     
-    if (view1 != nil) {
-        [view1 removeFromSuperview];
-        [view2 removeFromSuperview];
-        [view1 release];
-        [view2 release];
-    }
-
-    if (imageSets.count > 0) {
-        NSString *filePath = [[imageSets objectForKey:[[imageSets allKeys] objectAtIndex:0]] objectAtIndex:0];
-        NSLog(@"Loading %@", filePath);
-        
-        view1 = [[UIImageView alloc] initWithFrame:bounds];
-        view1.contentMode = UIViewContentModeScaleAspectFit;
-        view1.backgroundColor = [UIColor blackColor];
-        view1.image = [UIImage imageWithContentsOfFile:filePath];
-        view1.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-        
-        [containerView addSubview:view1];
-        
-        filePath = [[imageSets objectForKey:[[imageSets allKeys] objectAtIndex:0]] objectAtIndex:1];
-        NSLog(@"Loading %@", filePath);
-        
-        view2 = [[UIImageView alloc] initWithFrame:bounds];
-        view2.contentMode = UIViewContentModeScaleAspectFit;
-        view2.backgroundColor = [UIColor blackColor];
-        view2.image = [UIImage imageWithContentsOfFile:filePath];
-        view2.hidden = YES;
-        view2.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-        
-        [containerView addSubview:view2];
-        
-        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]
-                                              initWithTarget:self action:@selector(nextTransition:)];
-        [tapGesture setNumberOfTapsRequired:1];
-        [tapGesture setNumberOfTouchesRequired:1];
-        [containerView addGestureRecognizer: tapGesture];
-        [tapGesture release];
-        
-        transitioning = NO;
-    }
-    else {
-        UILabel *noImagesLabel = [[UILabel alloc] initWithFrame:CGRectMake(bounds.size.width * 0.05, 0, bounds.size.width * 0.9, bounds.size.height)];
-        noImagesLabel.text = @"No images found. To add images:\n - Connect your device to iTunes\n - In iTunes, select your device, and then click the Apps tab\n - Below File Sharing, select \"Image Set Viewer\" from the list, and then click Add.\n  - In the window that appears, select a file to transfer, and then click Choose.\nImages must have a filename ending with an underscore followed by digits, e.g. Image1_001.jpg, Image1_002.jpg, etc. Images with the same prefix are collected into a set.";
-        noImagesLabel.backgroundColor = [UIColor clearColor];
-        noImagesLabel.textColor = [UIColor whiteColor];
-        noImagesLabel.shadowColor = [UIColor grayColor];
-        noImagesLabel.shadowOffset = CGSizeMake(1,1);
-        noImagesLabel.font = [UIFont systemFontOfSize:24];
-        noImagesLabel.lineBreakMode = UILineBreakModeWordWrap;
-        noImagesLabel.numberOfLines = 0;
-        noImagesLabel.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-        
-        [containerView addSubview:noImagesLabel];
-    }
+    [self tilePages];
 }
 
 /*
@@ -134,13 +79,111 @@
 
 
 - (void)dealloc {
-    [containerView release];
+    //[containerView release];
     [pagingScrollView release];
-    [view1 release];
-	[view2 release];
+    //[view1 release];
+	//[view2 release];
     [imageSets release];
     [super dealloc];
 }
+
+#pragma mark -
+#pragma mark Tiling and page configuration
+
+- (void)tilePages
+{
+    if (noImagesLabel != nil) {
+        [noImagesLabel removeFromSuperview];
+        [noImagesLabel release];
+        noImagesLabel = nil;
+    }
+    
+    CGRect visibleBounds = pagingScrollView.bounds;
+    
+    if (imageSets.count > 0) {
+        // Calculate which pages are visible
+        int firstNeededPageIndex = floorf(CGRectGetMinX(visibleBounds) / CGRectGetWidth(visibleBounds));
+        int lastNeededPageIndex  = floorf((CGRectGetMaxX(visibleBounds)-1) / CGRectGetWidth(visibleBounds));
+        firstNeededPageIndex = MAX(firstNeededPageIndex, 0);
+        lastNeededPageIndex  = MIN(lastNeededPageIndex, imageSets.count - 1);
+        
+        // Recycle no-longer-visible pages
+        for (ImageScrollView *page in visiblePages) {
+            if (page.index < firstNeededPageIndex || page.index > lastNeededPageIndex) {
+                [recycledPages addObject:page];
+                [page removeFromSuperview];
+            }
+        }
+        [visiblePages minusSet:recycledPages];
+        
+        // add missing pages
+        for (int index = firstNeededPageIndex; index <= lastNeededPageIndex; index++) {
+            if (![self isDisplayingPageForIndex:index]) {
+                ImageScrollView *page = [self dequeueRecycledPage];
+                if (page == nil) {
+                    page = [[[ImageScrollView alloc] init] autorelease];
+                }
+                [self configurePage:page forIndex:index];
+                [pagingScrollView addSubview:page];
+                [visiblePages addObject:page];
+            }
+        }
+    }
+    else {
+        // no pages
+        noImagesLabel = [[UILabel alloc] initWithFrame:CGRectMake(visibleBounds.size.width * 0.05, 0, visibleBounds.size.width * 0.9, visibleBounds.size.height)];
+        noImagesLabel.text = @"No images found. To add images:\n - Connect your device to iTunes\n - In iTunes, select your device, and then click the Apps tab\n - Below File Sharing, select \"Image Set Viewer\" from the list, and then click Add.\n  - In the window that appears, select a file to transfer, and then click Choose.\nImages must have a filename ending with an underscore followed by digits, e.g. Image1_001.jpg, Image1_002.jpg, etc. Images with the same prefix are collected into a set.";
+        noImagesLabel.backgroundColor = [UIColor clearColor];
+        noImagesLabel.textColor = [UIColor whiteColor];
+        noImagesLabel.shadowColor = [UIColor grayColor];
+        noImagesLabel.shadowOffset = CGSizeMake(1,1);
+        noImagesLabel.font = [UIFont systemFontOfSize:24];
+        noImagesLabel.lineBreakMode = UILineBreakModeWordWrap;
+        noImagesLabel.numberOfLines = 0;
+        noImagesLabel.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        
+        [pagingScrollView addSubview:noImagesLabel];
+    }
+}
+
+- (ImageScrollView *)dequeueRecycledPage
+{
+    ImageScrollView *page = [recycledPages anyObject];
+    if (page) {
+        [[page retain] autorelease];
+        [recycledPages removeObject:page];
+    }
+    return page;
+}
+
+- (BOOL)isDisplayingPageForIndex:(NSUInteger)index
+{
+    BOOL foundPage = NO;
+    for (ImageScrollView *page in visiblePages) {
+        if (page.index == index) {
+            foundPage = YES;
+            break;
+        }
+    }
+    return foundPage;
+}
+
+- (void)configurePage:(ImageScrollView *)page forIndex:(NSUInteger)index
+{
+    page.index = index;
+    page.frame = [self frameForPageAtIndex:index];
+    
+    [page displayImageSet:[imageSets objectForKey:[[imageSets allKeys] objectAtIndex:index]]];
+    
+    // Use tiled images
+    //[page displayTiledImageNamed:[self imageNameAtIndex:index]
+    //                        size:[self imageSizeAtIndex:index]];
+    
+    // To use full images instead of tiled images, replace the "displayTiledImageNamed:" call
+    // above by the following line:
+    // [page displayImage:[self imageAtIndex:index]];
+}
+
 
 #pragma mark -
 #pragma mark  Frame calculations
@@ -169,53 +212,6 @@
     // We have to use the paging scroll view's bounds to calculate the contentSize, for the same reason outlined above.
     CGRect bounds = pagingScrollView.bounds;
     return CGSizeMake(bounds.size.width * imageSets.count, bounds.size.height);
-}
-
-#pragma mark -
-#pragma mark Transitioning
-
--(void)performTransition
-{
-    NSLog(@"Transitioning");
-	// First create a CATransition object to describe the transition
-	CATransition *transition = [CATransition animation];
-	// Animate over 3/4 of a second
-	transition.duration = 0.75;
-	// using the ease in/out timing function
-	transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-
-	transition.type = kCATransitionFade;
-	
-	// Finally, to avoid overlapping transitions we assign ourselves as the delegate for the animation and wait for the
-	// -animationDidStop:finished: message. When it comes in, we will flag that we are no longer transitioning.
-	transitioning = YES;
-	transition.delegate = self;
-	
-	// Next add it to the containerView's layer. This will perform the transition based on how we change its contents.
-	[containerView.layer addAnimation:transition forKey:nil];
-	
-	// Here we hide view1, and show view2, which will cause Core Animation to animate view1 away and view2 in.
-	view1.hidden = YES;
-	view2.hidden = NO;
-	
-	// And so that we will continue to swap between our two images, we swap the instance variables referencing them.
-	UIImageView *tmp = view2;
-	view2 = view1;
-	view1 = tmp;
-}
-
--(void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag
-{
-	transitioning = NO;
-}
-
--(IBAction)nextTransition:(UITapGestureRecognizer *)gestureRecognizer
-{
-    NSLog(@"Tapped");
-	if(!transitioning)
-	{
-		[self performTransition];
-	}
 }
 
 #pragma mark -
@@ -250,8 +246,7 @@
             [fileArray addObject:[directoryPath stringByAppendingPathComponent:fileName]];
         }
     }
-    [self setupTransitionViews];
+    [self tilePages];
 }
-
 
 @end

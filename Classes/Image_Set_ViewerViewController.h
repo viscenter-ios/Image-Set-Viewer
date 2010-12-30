@@ -8,20 +8,25 @@
 
 #import <UIKit/UIKit.h>
 
-@interface Image_Set_ViewerViewController : UIViewController {
-    UIView *containerView;
+@class ImageScrollView;
+
+@interface Image_Set_ViewerViewController : UIViewController <UIScrollViewDelegate> {
+    // UIView *containerView;
     UIScrollView *pagingScrollView;
+    UILabel *noImagesLabel;
     
-	UIImageView *view1;
-	UIImageView *view2;
-	BOOL transitioning;
+    NSMutableSet *recycledPages;
+    NSMutableSet *visiblePages;
     
     NSMutableDictionary *imageSets;
+    
+    // these values are stored off before we start rotation so we adjust our content offset appropriately during rotation
+    int           firstVisiblePageIndexBeforeRotation;
+    CGFloat       percentScrolledIntoFirstVisiblePage;
 }
 
 @property (nonatomic, retain) IBOutlet UIView *containerView;
 
-- (void)updateImageSetLibrary;
 - (void)setupTransitionViews;
 
 - (IBAction)nextTransition:(UITapGestureRecognizer *)gestureRecognizer;
@@ -29,6 +34,8 @@
 - (CGRect)frameForPagingScrollView;
 - (CGRect)frameForPageAtIndex:(NSUInteger)index;
 - (CGSize)contentSizeForPagingScrollView;
+
+- (void)updateImageSetLibrary;
 
 @end
 

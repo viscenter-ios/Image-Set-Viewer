@@ -18,6 +18,7 @@
 		9419986012CBB623003859CF /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9419985F12CBB622003859CF /* QuartzCore.framework */; };
 		9419992012CCD18E003859CF /* logo-57x57.png in Resources */ = {isa = PBXBuildFile; fileRef = 9419991E12CCD18E003859CF /* logo-57x57.png */; };
 		9419992112CCD18E003859CF /* logo-72x72.png in Resources */ = {isa = PBXBuildFile; fileRef = 9419991F12CCD18E003859CF /* logo-72x72.png */; };
+		9472DEC212CCDE2B000CCA81 /* ImageScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9472DEC112CCDE2B000CCA81 /* ImageScrollView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +38,8 @@
 		9419985F12CBB622003859CF /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		9419991E12CCD18E003859CF /* logo-57x57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "logo-57x57.png"; sourceTree = "<group>"; };
 		9419991F12CCD18E003859CF /* logo-72x72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "logo-72x72.png"; sourceTree = "<group>"; };
+		9472DEC012CCDE2B000CCA81 /* ImageScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageScrollView.h; sourceTree = "<group>"; };
+		9472DEC112CCDE2B000CCA81 /* ImageScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageScrollView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +60,8 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				9472DEC012CCDE2B000CCA81 /* ImageScrollView.h */,
+				9472DEC112CCDE2B000CCA81 /* ImageScrollView.m */,
 				1D3623240D0F684500981E51 /* Image_Set_ViewerAppDelegate.h */,
 				1D3623250D0F684500981E51 /* Image_Set_ViewerAppDelegate.m */,
 				28D7ACF60DDB3853001CB0EB /* Image_Set_ViewerViewController.h */,
@@ -183,6 +188,7 @@
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* Image_Set_ViewerAppDelegate.m in Sources */,
 				28D7ACF80DDB3853001CB0EB /* Image_Set_ViewerViewController.m in Sources */,
+				9472DEC212CCDE2B000CCA81 /* ImageScrollView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
