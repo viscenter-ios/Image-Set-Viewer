@@ -32,38 +32,55 @@
     
     containerView = [[UIView alloc] initWithFrame:bounds];
     containerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    containerView.backgroundColor = [UIColor blackColor];
     
-    NSString *filePath = [[imageSets objectForKey:[[imageSets allKeys] objectAtIndex:1]] objectAtIndex:0];
-    NSLog(@"Loading %@", filePath);
-    
-    view1 = [[UIImageView alloc] initWithFrame:bounds];
-    view1.contentMode = UIViewContentModeScaleAspectFit;
-    view1.backgroundColor = [UIColor blackColor];
-    view1.image = [UIImage imageWithContentsOfFile:filePath];
-    view1.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    
-    [containerView addSubview:view1];
-    
-    filePath = [[imageSets objectForKey:[[imageSets allKeys] objectAtIndex:1]] objectAtIndex:1];
-    NSLog(@"Loading %@", filePath);
-    
-    view2 = [[UIImageView alloc] initWithFrame:bounds];
-    view2.contentMode = UIViewContentModeScaleAspectFit;
-    view2.backgroundColor = [UIColor blackColor];
-    view2.image = [UIImage imageWithContentsOfFile:filePath];
-    view2.hidden = YES;
-    view2.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    
-    [containerView addSubview:view2];
-    
-    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]
-                                          initWithTarget:self action:@selector(nextTransition:)];
-    [tapGesture setNumberOfTapsRequired:1];
-    [tapGesture setNumberOfTouchesRequired:1];
-    [containerView addGestureRecognizer: tapGesture];
-    [tapGesture release];
-    
-    transitioning = NO;
+    if (imageSets.count > 0) {
+        NSString *filePath = [[imageSets objectForKey:[[imageSets allKeys] objectAtIndex:1]] objectAtIndex:0];
+        NSLog(@"Loading %@", filePath);
+        
+        view1 = [[UIImageView alloc] initWithFrame:bounds];
+        view1.contentMode = UIViewContentModeScaleAspectFit;
+        view1.backgroundColor = [UIColor blackColor];
+        view1.image = [UIImage imageWithContentsOfFile:filePath];
+        view1.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        
+        [containerView addSubview:view1];
+        
+        filePath = [[imageSets objectForKey:[[imageSets allKeys] objectAtIndex:1]] objectAtIndex:1];
+        NSLog(@"Loading %@", filePath);
+        
+        view2 = [[UIImageView alloc] initWithFrame:bounds];
+        view2.contentMode = UIViewContentModeScaleAspectFit;
+        view2.backgroundColor = [UIColor blackColor];
+        view2.image = [UIImage imageWithContentsOfFile:filePath];
+        view2.hidden = YES;
+        view2.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        
+        [containerView addSubview:view2];
+        
+        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]
+                                              initWithTarget:self action:@selector(nextTransition:)];
+        [tapGesture setNumberOfTapsRequired:1];
+        [tapGesture setNumberOfTouchesRequired:1];
+        [containerView addGestureRecognizer: tapGesture];
+        [tapGesture release];
+        
+        transitioning = NO;
+    }
+    else {
+        UILabel *noImagesLabel = [[UILabel alloc] initWithFrame:CGRectMake(bounds.size.width * 0.05, 0, bounds.size.width * 0.9, bounds.size.height)];
+        noImagesLabel.text = @"No images found. To add images:\n - Connect your device to iTunes\n - In iTunes, select your device, and then click the Apps tab\n - Below File Sharing, select \"Image Set Viewer\" from the list, and then click Add.\n  - In the window that appears, select a file to transfer, and then click Choose.\nImages must have a filename ending with an underscore followed by digits, e.g. Image1_001.jpg, Image1_002.jpg, etc. Images with the same prefix are collected into a set.";
+        noImagesLabel.backgroundColor = [UIColor clearColor];
+        noImagesLabel.textColor = [UIColor whiteColor];
+        noImagesLabel.shadowColor = [UIColor grayColor];
+        noImagesLabel.shadowOffset = CGSizeMake(1,1);
+        noImagesLabel.font = [UIFont systemFontOfSize:24];
+        noImagesLabel.lineBreakMode = UILineBreakModeWordWrap;
+        noImagesLabel.numberOfLines = 0;
+        noImagesLabel.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        
+        [containerView addSubview:noImagesLabel];
+    }
     
     self.view = containerView;
 }
