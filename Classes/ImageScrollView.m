@@ -269,8 +269,10 @@
 	view2 = view1;
 	view1 = tmp;
     
-    setIndex = [self nextIndex];
-    [self updateTransitionView];
+    if (imageSet.count > 2) {
+        setIndex = [self nextIndex];
+        [self updateTransitionView];
+    }
     
     self.zoomScale = zoomStart;
     view1.center = centerStart;
